@@ -157,7 +157,7 @@ func (s *StompManager) Send(data []byte) error {
 
 // String represents Stomp Manager
 func (s *StompManager) String() string {
-	r := fmt.Sprintf("<StompManager: addrs=%+v, endpoint=%s, iters=%v, sendTimeout=%v, recvTimeout=%v>", s.Addresses, s.Config.Endpoint, s.Config.StompIterations, s.Config.StompSendTimeout, s.Config.StompRecvTimeout)
+	r := fmt.Sprintf("<StompManager: addrs=%+v, endpoint=%s, iters=%v, sendTimeout=%v, recvTimeout=%v, verbose=%v>", s.Addresses, s.Config.Endpoint, s.Config.StompIterations, s.Config.StompSendTimeout, s.Config.StompRecvTimeout, s.Config.Verbose)
 	return r
 }
 
