@@ -1,6 +1,7 @@
 package lbstomp
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -20,13 +21,13 @@ func TestStompMgr(t *testing.T) {
 	// proper configuration
 	config := Config{StompURI: uri, StompLogin: "test", StompPassword: "test"}
 	mgr := New(config)
+	fmt.Println(mgr.String())
 	_, addr, err = mgr.getConnection()
-
-	if addr == "" {
-		t.Errorf("unable to resolve uri %s addr %v\n", uri, addr)
-	}
 	if err != nil {
 		t.Errorf("unable to get connections, error %v\n", err)
+	}
+	if addr == "" {
+		t.Errorf("unable to resolve uri %s addr %v\n", uri, addr)
 	}
 
 	// send data chunk

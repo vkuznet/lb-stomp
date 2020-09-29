@@ -165,5 +165,7 @@ func (s *StompManager) String() string {
 func New(config Config) *StompManager {
 	rand.Seed(12345)
 	mgr := StompManager{Config: config}
+	// initialize connections
+	mgr.getConnection()
 	return &mgr
 }
