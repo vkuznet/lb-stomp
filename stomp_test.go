@@ -10,7 +10,7 @@ func TestStompMgr(t *testing.T) {
 	uri := "www.yahoo.com:12345"
 
 	// improper configuration, lack of Login/Password
-	c := Config{StompURI: uri}
+	c := Config{URI: uri}
 	m := New(c)
 	_, addr, err := m.getConnection()
 
@@ -19,7 +19,7 @@ func TestStompMgr(t *testing.T) {
 	}
 
 	// proper configuration
-	config := Config{StompURI: uri, StompLogin: "test", StompPassword: "test"}
+	config := Config{URI: uri, Login: "test", Password: "test"}
 	mgr := New(config)
 	fmt.Println(mgr.String())
 	_, addr, err = mgr.getConnection()

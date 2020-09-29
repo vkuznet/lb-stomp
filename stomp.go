@@ -19,15 +19,15 @@ import (
 
 // Config stores server configuration parameters
 type Config struct {
-	StompURI         string `json:"stompURI"`         // StompAMQ URI
-	StompLogin       string `json:"stompLogin"`       // StompAQM login name
-	StompPassword    string `json:"stompPassword"`    // StompAQM password
-	StompIterations  int    `json:"stompIterations"`  // Stomp iterations
-	StompSendTimeout int    `json:"stompSendTimeout"` // heartbeat send timeout
-	StompRecvTimeout int    `json:"stompRecvTimeout"` // heartbeat recv timeout
-	Endpoint         string `json:"endpoint"`         // StompAMQ endpoint
-	ContentType      string `json:"contentType"`      // ContentType of UDP packet
-	Verbose          int    `json:"verbose"`          // verbosity level
+	URI         string `json:"uri"`         // Stomp AMQ URI
+	Login       string `json:"login"`       // Stomp AQM login name
+	Password    string `json:"password"`    // Stomp AQM password
+	Iterations  int    `json:"iterations"`  // Stomp iterations
+	SendTimeout int    `json:"sendTimeout"` // heartbeat send timeout
+	RecvTimeout int    `json:"recvTimeout"` // heartbeat recv timeout
+	Endpoint    string `json:"endpoint"`    // StompAMQ endpoint
+	ContentType string `json:"contentType"` // ContentType of UDP packet
+	Verbose     int    `json:"verbose"`     // verbosity level
 }
 
 // helper function to resolve Stomp URI into list of addr:port pairs
@@ -59,7 +59,7 @@ type StompManager struct {
 
 // reset all stomp connections
 func (s *StompManager) resetConnection() {
-	log.Println("reset all connections to StompAMQ", s.Config.StompURI)
+	log.Println("reset all connections to StompAMQ", s.Config.URI)
 	for _, c := range s.ConnectionPool {
 		if c != nil {
 			c.Disconnect()
@@ -78,39 +78,39 @@ func (s *StompManager) getConnection() (*stomp.Conn, string, error) {
 			return conn, addr, nil
 		}
 	}
-	if s.Config.StompURI == "" {
+	if s.Config.URI == "" {
 		err := errors.New("Unable to connect to Stomp, not URI")
 		return nil, "", err
 	}
-	if s.Config.StompLogin == "" {
+	if s.Config.Login == "" {
 		err := errors.New("Unable to connect to Stomp, not login")
 		return nil, "", err
 	}
-	if s.Config.StompPassword == "" {
+	if s.Config.Password == "" {
 		err := errors.New("Unable to connect to Stomp, not password")
 		return nil, "", err
 	}
 	if len(s.Addresses) == 0 {
-		addrs, err := resolveURI(s.Config.StompURI)
+		addrs, err := resolveURI(s.Config.URI)
 		if err != nil {
-			err := errors.New(fmt.Sprintf("Unable to resolve StompURI, error %v", err))
+			err := errors.New(fmt.Sprintf("Unable to resolve URI, error %v", err))
 			return nil, "", err
 		}
 		s.Addresses = addrs
 	}
 	// in case of test login return
-	if s.Config.StompLogin == "test" {
+	if s.Config.Login == "test" {
 		idx := rand.Intn(len(s.Addresses))
 		addr := s.Addresses[idx]
 		return nil, addr, nil
 	}
 	// make connection pool equal to number of IP addresses we have
 	s.ConnectionPool = make([]*stomp.Conn, len(s.Addresses))
-	sendTimeout := time.Duration(s.Config.StompSendTimeout)
-	recvTimeout := time.Duration(s.Config.StompRecvTimeout)
+	sendTimeout := time.Duration(s.Config.SendTimeout)
+	recvTimeout := time.Duration(s.Config.RecvTimeout)
 	for idx, addr := range s.Addresses {
 		conn, err := stomp.Dial("tcp", addr,
-			stomp.ConnOpt.Login(s.Config.StompLogin, s.Config.StompPassword),
+			stomp.ConnOpt.Login(s.Config.Login, s.Config.Password),
 			stomp.ConnOpt.HeartBeat(sendTimeout*time.Millisecond, recvTimeout*time.Millisecond),
 		)
 		if err != nil {
@@ -131,7 +131,7 @@ func (s *StompManager) getConnection() (*stomp.Conn, string, error) {
 func (s *StompManager) Send(data []byte) error {
 	var err error
 	conn, addr, err := s.getConnection()
-	for i := 0; i < s.Config.StompIterations; i++ {
+	for i := 0; i < s.Config.Iterations; i++ {
 		// we send data using existing stomp connection
 		err = conn.Send(s.Config.Endpoint, s.Config.ContentType, data)
 		if err == nil {
@@ -142,7 +142,7 @@ func (s *StompManager) Send(data []byte) error {
 		}
 		log.Println("fail to send data", err)
 		// since we fail we'll acquire new stomp connection and retry
-		if i == s.Config.StompIterations-1 {
+		if i == s.Config.Iterations-1 {
 			log.Printf("unable to send data to %s, error %v, iteration %d\n", s.Config.Endpoint, err, i)
 		} else {
 			log.Printf("unable to send data to %s, error %v, iteration %d\n", s.Config.Endpoint, err, i)
@@ -158,7 +158,7 @@ func (s *StompManager) Send(data []byte) error {
 
 // String represents Stomp Manager
 func (s *StompManager) String() string {
-	r := fmt.Sprintf("<StompManager: addrs=%+v, endpoint=%s, iters=%v, sendTimeout=%v, recvTimeout=%v, verbose=%v>", s.Addresses, s.Config.Endpoint, s.Config.StompIterations, s.Config.StompSendTimeout, s.Config.StompRecvTimeout, s.Config.Verbose)
+	r := fmt.Sprintf("<StompManager: addrs=%+v, endpoint=%s, iters=%v, sendTimeout=%v, recvTimeout=%v, verbose=%v>", s.Addresses, s.Config.Endpoint, s.Config.Iterations, s.Config.SendTimeout, s.Config.RecvTimeout, s.Config.Verbose)
 	return r
 }
 
