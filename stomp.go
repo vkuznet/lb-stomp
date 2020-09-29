@@ -156,6 +156,12 @@ func (s *StompManager) Send(data []byte) error {
 	return err
 }
 
+// String represents Stomp Manager
+func (s *StompManager) String() string {
+	r := fmt.Sprintf("<StompManager: addrs=%+v, endpoint=%s, iters=%v, sendTimeout=%v, recvTimeout=%v>", s.Addresses, s.Config.Endpoint, s.Config.StompIterations, s.Config.StompSendTimeout, s.Config.StompRecvTimeout)
+	return r
+}
+
 // New creates new instance of StompManager
 func New(config Config) *StompManager {
 	rand.Seed(12345)
