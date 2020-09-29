@@ -19,7 +19,6 @@ import (
 
 // Config stores server configuration parameters
 type Config struct {
-	BufSize          int    `json:"bufSize"`          // buffer size
 	StompURI         string `json:"stompURI"`         // StompAMQ URI
 	StompLogin       string `json:"stompLogin"`       // StompAQM login name
 	StompPassword    string `json:"stompPassword"`    // StompAQM password
