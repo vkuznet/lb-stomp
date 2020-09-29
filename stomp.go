@@ -1,4 +1,4 @@
-package main
+package lbstomp
 
 // lb-stomp - Load-balancer access to stomp
 //
