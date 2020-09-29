@@ -140,6 +140,7 @@ func (s *StompManager) Send(data []byte) error {
 			}
 			return nil
 		}
+		log.Println("fail to send data", err)
 		// since we fail we'll acquire new stomp connection and retry
 		if i == s.Config.StompIterations-1 {
 			log.Printf("unable to send data to %s, error %v, iteration %d\n", s.Config.Endpoint, err, i)
