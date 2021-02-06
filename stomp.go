@@ -66,6 +66,8 @@ func (s *StompManager) resetConnection() {
 		}
 		c = nil
 	}
+	// reset connection pool
+	s.ConnectionPool = nil
 }
 
 // get new stomp connection
