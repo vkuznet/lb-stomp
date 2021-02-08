@@ -10,8 +10,9 @@ func TestStompMgr(t *testing.T) {
 	uri := "www.yahoo.com:12345"
 
 	// improper configuration, lack of Login/Password
-	c := Config{URI: uri}
+	c := Config{URI: uri, Protocol: "tcp4", Verbose: 1}
 	m := New(c)
+	fmt.Println(m.String())
 	_, addr, err := m.getConnection()
 
 	if err == nil {
@@ -19,7 +20,7 @@ func TestStompMgr(t *testing.T) {
 	}
 
 	// proper configuration
-	config := Config{URI: uri, Login: "test", Password: "test"}
+	config := Config{URI: uri, Login: "test", Password: "test", Protocol: "tcp"}
 	mgr := New(config)
 	fmt.Println(mgr.String())
 	_, addr, err = mgr.getConnection()

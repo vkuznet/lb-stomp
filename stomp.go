@@ -27,11 +27,12 @@ type Config struct {
 	RecvTimeout int    `json:"recvTimeout"` // heartbeat recv timeout
 	Endpoint    string `json:"endpoint"`    // StompAMQ endpoint
 	ContentType string `json:"contentType"` // ContentType of UDP packet
+	Protocol    string `json:"protocol"`    // network protocol to use
 	Verbose     int    `json:"verbose"`     // verbosity level
 }
 
 // helper function to resolve Stomp URI into list of addr:port pairs
-func resolveURI(uri string) ([]string, error) {
+func resolveURI(uri, protocol string) ([]string, error) {
 	var out []string
 	arr := strings.Split(uri, ":")
 	host := arr[0]
@@ -44,7 +45,15 @@ func resolveURI(uri string) ([]string, error) {
 	for _, addr := range addrs {
 		// use only IPv4 addresses
 		if strings.Contains(addr.String(), ".") {
-			out = append(out, fmt.Sprintf("%s:%s", addr, port))
+			if protocol == "tcp" || protocol == "tcp4" {
+				out = append(out, fmt.Sprintf("%s:%s", addr, port))
+			}
+		} else if strings.Contains(addr.String(), ":") {
+			// for ipv6 network address we should use [ipv6]:port notations
+			// see https://golang.org/pkg/net/
+			if protocol == "tcp" || protocol == "tcp6" {
+				out = append(out, fmt.Sprintf("[%s]:%s", addr, port))
+			}
 		}
 	}
 	return out, nil
@@ -92,13 +101,24 @@ func (s *StompManager) getConnection() (*stomp.Conn, string, error) {
 		err := errors.New("Unable to connect to Stomp, not password")
 		return nil, "", err
 	}
+	if s.Config.Protocol == "" {
+		s.Config.Protocol = "tcp4"
+	}
 	if len(s.Addresses) == 0 {
-		addrs, err := resolveURI(s.Config.URI)
+		addrs, err := resolveURI(s.Config.URI, s.Config.Protocol)
+		if s.Config.Verbose > 0 {
+			for _, addr := range addrs {
+				log.Println("use", addr)
+			}
+		}
 		if err != nil {
 			err := errors.New(fmt.Sprintf("Unable to resolve URI, error %v", err))
 			return nil, "", err
 		}
 		s.Addresses = addrs
+	}
+	if len(s.Addresses) == 0 {
+		return nil, "", errors.New("no valid IP addresses found")
 	}
 	// in case of test login return
 	if s.Config.Login == "test" {
@@ -160,7 +180,7 @@ func (s *StompManager) Send(data []byte) error {
 
 // String represents Stomp Manager
 func (s *StompManager) String() string {
-	r := fmt.Sprintf("<StompManager: addrs=%+v, endpoint=%s, iters=%v, sendTimeout=%v, recvTimeout=%v, verbose=%v>", s.Addresses, s.Config.Endpoint, s.Config.Iterations, s.Config.SendTimeout, s.Config.RecvTimeout, s.Config.Verbose)
+	r := fmt.Sprintf("<StompManager: addrs=%+v, endpoint=%s, iters=%v, sendTimeout=%v, recvTimeout=%v, protocol=%s, verbose=%v>", s.Addresses, s.Config.Endpoint, s.Config.Iterations, s.Config.SendTimeout, s.Config.RecvTimeout, s.Config.Protocol, s.Config.Verbose)
 	return r
 }
 
