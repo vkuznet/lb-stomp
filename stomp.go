@@ -131,14 +131,14 @@ func (s *StompManager) getConnection() (*stomp.Conn, string, error) {
 	sendTimeout := time.Duration(s.Config.SendTimeout)
 	recvTimeout := time.Duration(s.Config.RecvTimeout)
 	for idx, addr := range s.Addresses {
-		conn, err := stomp.Dial("tcp", addr,
+		conn, err := stomp.Dial(s.Config.Protocol, addr,
 			stomp.ConnOpt.Login(s.Config.Login, s.Config.Password),
 			stomp.ConnOpt.HeartBeat(sendTimeout*time.Millisecond, recvTimeout*time.Millisecond),
 		)
 		if err != nil {
-			log.Printf("Unable to connect to %s, error %v\n", addr, err)
+			log.Printf("Unable to connect to '%s', error %v\n", addr, err)
 		} else {
-			log.Printf("connected to StompAMQ server %s\n", addr)
+			log.Printf("connected to StompAMQ server '%s'\n", addr)
 		}
 		s.ConnectionPool[idx] = conn
 	}
