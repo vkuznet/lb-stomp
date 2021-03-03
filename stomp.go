@@ -67,7 +67,7 @@ type StompManager struct {
 }
 
 // reset all stomp connections
-func (s *StompManager) resetConnection() {
+func (s *StompManager) ResetConnection() {
 	log.Println("reset all connections to StompAMQ", s.Config.URI)
 	for _, c := range s.ConnectionPool {
 		if c != nil {
@@ -80,7 +80,7 @@ func (s *StompManager) resetConnection() {
 }
 
 // get new stomp connection
-func (s *StompManager) getConnection() (*stomp.Conn, string, error) {
+func (s *StompManager) GetConnection() (*stomp.Conn, string, error) {
 	if len(s.ConnectionPool) > 0 && len(s.ConnectionPool) == len(s.Addresses) {
 		idx := rand.Intn(len(s.ConnectionPool))
 		addr := s.Addresses[idx]
@@ -152,7 +152,7 @@ func (s *StompManager) getConnection() (*stomp.Conn, string, error) {
 // helper function to send data to stomp
 func (s *StompManager) Send(data []byte) error {
 	var err error
-	conn, addr, err := s.getConnection()
+	conn, addr, err := s.GetConnection()
 	for i := 0; i < s.Config.Iterations; i++ {
 		// we send data using existing stomp connection
 		err = conn.Send(s.Config.Endpoint, s.Config.ContentType, data)
@@ -169,8 +169,8 @@ func (s *StompManager) Send(data []byte) error {
 		} else {
 			log.Printf("unable to send data to %s, error %v, iteration %d\n", s.Config.Endpoint, err, i)
 		}
-		s.resetConnection()
-		conn, addr, err = s.getConnection()
+		s.ResetConnection()
+		conn, addr, err = s.GetConnection()
 		if err != nil {
 			log.Printf("Unable to get connection, %v\n", err)
 		}
@@ -189,6 +189,6 @@ func New(config Config) *StompManager {
 	rand.Seed(12345)
 	mgr := StompManager{Config: config}
 	// initialize connections
-	mgr.getConnection()
+	mgr.GetConnection()
 	return &mgr
 }
