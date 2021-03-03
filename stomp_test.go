@@ -13,7 +13,7 @@ func TestStompMgr(t *testing.T) {
 	c := Config{URI: uri, Protocol: "tcp4", Verbose: 1}
 	m := New(c)
 	fmt.Println(m.String())
-	_, addr, err := m.getConnection()
+	_, addr, err := m.GetConnection()
 
 	if err == nil {
 		t.Errorf("did not fail with empty login")
@@ -23,7 +23,7 @@ func TestStompMgr(t *testing.T) {
 	config := Config{URI: uri, Login: "test", Password: "test", Protocol: "tcp"}
 	mgr := New(config)
 	fmt.Println(mgr.String())
-	_, addr, err = mgr.getConnection()
+	_, addr, err = mgr.GetConnection()
 	if err != nil {
 		t.Errorf("unable to get connections, error %v\n", err)
 	}
