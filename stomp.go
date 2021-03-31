@@ -19,16 +19,17 @@ import (
 
 // Config stores server configuration parameters
 type Config struct {
-	URI         string `json:"uri"`         // Stomp AMQ URI
-	Login       string `json:"login"`       // Stomp AQM login name
-	Password    string `json:"password"`    // Stomp AQM password
-	Iterations  int    `json:"iterations"`  // Stomp iterations
-	SendTimeout int    `json:"sendTimeout"` // heartbeat send timeout
-	RecvTimeout int    `json:"recvTimeout"` // heartbeat recv timeout
-	Endpoint    string `json:"endpoint"`    // StompAMQ endpoint
-	ContentType string `json:"contentType"` // ContentType of UDP packet
-	Protocol    string `json:"protocol"`    // network protocol to use
-	Verbose     int    `json:"verbose"`     // verbosity level
+	URI                  string  `json:"uri"`                  // Stomp AMQ URI
+	Login                string  `json:"login"`                // Stomp AQM login name
+	Password             string  `json:"password"`             // Stomp AQM password
+	Iterations           int     `json:"iterations"`           // Stomp iterations
+	SendTimeout          int     `json:"sendTimeout"`          // heartbeat send timeout
+	RecvTimeout          int     `json:"recvTimeout"`          // heartbeat recv timeout
+	HeartBeatGracePeriod float64 `json:"heartBeatGracePeriod"` // is used to calculate the read heart-beat timeout
+	Endpoint             string  `json:"endpoint"`             // StompAMQ endpoint
+	ContentType          string  `json:"contentType"`          // ContentType of UDP packet
+	Protocol             string  `json:"protocol"`             // network protocol to use
+	Verbose              int     `json:"verbose"`              // verbosity level
 }
 
 // helper function to resolve Stomp URI into list of addr:port pairs
@@ -134,6 +135,7 @@ func (s *StompManager) GetConnection() (*stomp.Conn, string, error) {
 		conn, err := stomp.Dial(s.Config.Protocol, addr,
 			stomp.ConnOpt.Login(s.Config.Login, s.Config.Password),
 			stomp.ConnOpt.HeartBeat(sendTimeout*time.Millisecond, recvTimeout*time.Millisecond),
+			stomp.ConnOpt.HeartBeatGracePeriodMultiplier(s.Config.HeartBeatGracePeriod),
 		)
 		if err != nil {
 			log.Printf("Unable to connect to '%s', error %v\n", addr, err)
