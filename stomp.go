@@ -131,11 +131,15 @@ func (s *StompManager) GetConnection() (*stomp.Conn, string, error) {
 	s.ConnectionPool = make([]*stomp.Conn, len(s.Addresses))
 	sendTimeout := time.Duration(s.Config.SendTimeout)
 	recvTimeout := time.Duration(s.Config.RecvTimeout)
+	heartBeatGracePeriod := s.Config.HeartBeatGracePeriod
+	if heartBeatGracePeriod == 0 {
+		heartBeatGracePeriod = 1
+	}
 	for idx, addr := range s.Addresses {
 		conn, err := stomp.Dial(s.Config.Protocol, addr,
 			stomp.ConnOpt.Login(s.Config.Login, s.Config.Password),
 			stomp.ConnOpt.HeartBeat(sendTimeout*time.Millisecond, recvTimeout*time.Millisecond),
-			stomp.ConnOpt.HeartBeatGracePeriodMultiplier(s.Config.HeartBeatGracePeriod),
+			stomp.ConnOpt.HeartBeatGracePeriodMultiplier(heartBeatGracePeriod),
 		)
 		if err != nil {
 			log.Printf("Unable to connect to '%s', error %v\n", addr, err)
