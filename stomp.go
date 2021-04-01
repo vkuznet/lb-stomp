@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/go-stomp/stomp"
+	"github.com/go-stomp/stomp/frame"
 )
 
 // Config stores server configuration parameters
@@ -156,12 +157,12 @@ func (s *StompManager) GetConnection() (*stomp.Conn, string, error) {
 }
 
 // helper function to send data to stomp
-func (s *StompManager) Send(data []byte) error {
+func (s *StompManager) Send(data []byte, opts ...func(*frame.Frame) error) error {
 	var err error
 	conn, addr, err := s.GetConnection()
 	for i := 0; i < s.Config.Iterations; i++ {
 		// we send data using existing stomp connection
-		err = conn.Send(s.Config.Endpoint, s.Config.ContentType, data)
+		err = conn.Send(s.Config.Endpoint, s.Config.ContentType, data, opts...)
 		if err == nil {
 			if s.Config.Verbose > 0 {
 				log.Printf("send data to %s endpoint %s\n", addr, s.Config.Endpoint)
