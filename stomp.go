@@ -143,7 +143,7 @@ func (s *StompManager) GetConnection() (*stomp.Conn, string, error) {
 			stomp.ConnOpt.HeartBeatGracePeriodMultiplier(heartBeatGracePeriod),
 		)
 		if err != nil {
-			log.Printf("Unable to connect to '%s', error %v\n", addr, err)
+			log.Fatalf("Unable to connect to '%s', error %v\n", addr, err)
 		} else {
 			log.Printf("connected to StompAMQ server '%s'\n", addr)
 		}
